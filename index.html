@@ -1,0 +1,137 @@
+<title>MathsGym v1.4</title>
+
+<style>
+
+	html { background:black; color:white; text-align:center; font-family:arial; }
+	#logo { color:#AAA; font-size:24px; text-align:left; borderx:1px solid magenta; margin:10px 0px 0px 20px; }
+	#footer { color:#222; font-size:14px; text-align:center; borderx:1px solid magenta; margin:10px 10px 10px 0px; }
+	#message { color:lightskyblue; font-size:22px; borderx:1px solid cyan; margin-bottom:10px; }
+	input { border:0px; padding:5px; font-size:18px; background:#444; }
+
+	#tables td { text-align:center; padding:5px; color:#444; font-size:18px; }
+	.answer { width:50px; margin:3px; text-align:right; }
+
+</style>
+
+<center>
+	<div id='logo'>MathsGym</div>
+	<div id='message'><font style="color:lightskyblue">Answer and Hit [Enter]</font></div>
+	<table id='tables'>
+	</table>
+	<div id='footer'>eDictus</div>
+</center>
+
+<script>
+
+let tables = [];
+let ini = new Date();
+let min = 4, max = 12;
+
+let finished = false; 
+
+window.onload = function()
+{
+	let txt = buildtable(min, max);
+	document.getElementById('tables').innerHTML = txt;
+
+	select();
+}
+
+function select()
+{
+	let random = Math.floor(Math.random() * tables.length);
+	let selobj = tables[random];
+
+	let id = selobj.id;
+
+	let input = document.getElementById('inp.' + id);
+	let cell = document.getElementById('cell.' + id);
+
+	cell.style.color = input.style.background = 'white';
+	input.readOnly = false;
+	input.focus();
+
+	input.addEventListener('keyup', function(event)
+	{
+	    if (event.key === 'Enter') check(id, selobj.solution);
+	});
+}
+
+function check(id, solution)
+{
+	let input = document.getElementById('inp.' + id);
+	let cell = document.getElementById('cell.' + id);
+
+	if (!input.value.length) return;
+
+	let answer = input.value.replace(/\D/g,'');
+	input.value = +answer;
+	if (!answer) return;
+
+	let correct = (solution == answer);
+
+	cell.style.color = correct ? color = '#0F0' : color = '#F00';
+
+	input.style.backgroundColor = '#444';
+	input.readOnly = true;
+
+	let right = ['That is Correct!', 'Oh! you are Good', 'That is Impressive', 'Wow, you rock!', 'Awesome! Nicely Done', 'You are a Rock Star', 'Thunderbird', 'That is the spirit'];	
+	let wrong = ['Mmm, better luck next time', 'That is not Right', 'No, but you will do better next time', 'Come on, focus!'];	
+
+	feedtext = correct ? right[Math.floor(Math.random() * right.length)] : wrong[Math.floor(Math.random() * wrong.length)];
+	feedback = '<font style="color:' + color + '">' + feedtext + '</font>';
+	document.getElementById('message').innerHTML = feedback;
+
+	tables = tables.filter(function(item) { return item.id != id; }); // remove
+	if (tables.length > 0) select(); else endgame();
+
+	setTimeout(function()
+	{
+		if (finished) return;
+
+		let keep = ['Keep Going', 'You know this', 'Go Go Go', 'You can do this', 'I know you know', 'Time is running'];
+		document.getElementById('message').innerHTML = keep[Math.floor(Math.random() * keep.length)];
+	}, 2000); 
+}
+
+function buildtable(min, max)
+{
+	let txt = ''; max++;
+
+	for (let i = min; i < max; i++)
+	{
+		txt += '<tr>';
+		
+		for (let j = min; j < max; j++)
+		{
+			id = i + 'x' + j;
+			obj = { id:id, solution:i*j, time:null };
+			tables.push(obj);
+
+			txt += '<td id="cell.' + id + '">' + id + '<br><input class="answer" id="inp.' + id + '" readonly>';
+		}
+	}
+
+	return txt;
+}
+
+function endgame()
+{
+	finished = true;
+
+	let end = new Date();
+	let tot = Math.round((end - ini) / 1000);
+
+	let mins = Math.floor(tot / 60);	
+	let secs = tot - mins * 60;
+
+	mins = mins < 10 ? '0' + mins : mins;
+	secs = secs < 10 ? '0' + secs : secs;
+
+	let time = mins + ':' + secs;
+	let msg = 'Total time ' + time + ' <span style="font-size:smaller;opacity:40%;">[' + tot + ' secs]</span>';
+
+	document.getElementById('message').innerHTML = msg;
+}
+
+</script>
